@@ -29,6 +29,7 @@
 #define FREERTOS_CONFIG_H
 
 #include <lpc21xx.h>
+#include "GPIO.h"
 
 /*-----------------------------------------------------------
  * Application specific definitions.
@@ -42,9 +43,9 @@
  * See http://www.freertos.org/a00110.html
  *----------------------------------------------------------*/
 
-#define configUSE_PREEMPTION		1   /** activate preemption **/
-#define configUSE_IDLE_HOOK			0
-#define configUSE_TICK_HOOK			0
+#define configUSE_PREEMPTION		1
+#define configUSE_IDLE_HOOK			1
+#define configUSE_TICK_HOOK			1
 #define configCPU_CLOCK_HZ			( ( unsigned long ) 60000000 )	/* =12.0MHz xtal multiplied by 5 using the PLL. */
 #define configTICK_RATE_HZ			( ( TickType_t ) 1000 )
 #define configMAX_PRIORITIES		( 4 )
@@ -54,8 +55,13 @@
 #define configUSE_TRACE_FACILITY	0
 #define configUSE_16_BIT_TICKS		0
 #define configIDLE_SHOULD_YIELD		1
+#define configUSE_EDF_SCHEDULER   1
+#define configUSE_TIME_SLICING 		1
+#define configUSE_APPLICATION_TASK_TAG	1
+
 #define configQUEUE_REGISTRY_SIZE 	0
-#define configUSE_EDF_SCHEDULER   1   /** add EDF_SCHEDULER configuration parameter **/
+
+#define configIDLE_TSK_PERIOD				200
 
 /* Co-routine definitions. */
 #define configUSE_CO_ROUTINES 		0
@@ -73,5 +79,76 @@ to exclude the API function. */
 #define INCLUDE_vTaskDelay				1
 
 
+#define traceTASK_SWITCHED_IN(){																																					\
+																	if( PIN2 == (int)pxCurrentTCB->pxTaskTag )  														\
+																	{																																				\
+																		Timer_Task1_In = T1TC;																										\
+																	}																																				\
+																	else if( PIN3 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task2_In = T1TC;																										\
+																	}																																				\
+																	else if( PIN4 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task3_In = T1TC;																										\
+																	}																																				\
+																	else if( PIN5 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task4_In = T1TC;																										\
+																	}																																				\
+																	else if( PIN6 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task5_In = T1TC;																										\
+																	}																																				\
+																	else if( PIN7 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task6_In = T1TC;																										\
+																	}																																				\
+																	else{}																																	\
+																	GPIO_write(PORT_0, (int)pxCurrentTCB->pxTaskTag, PIN_IS_HIGH );					\
+																}																																					\
 
+																
+#define traceTASK_SWITCHED_OUT(){																																					\
+																	if( PIN2 == (int)pxCurrentTCB->pxTaskTag )  														\
+																	{																																				\
+																		Timer_Task1_Out = T1TC;																										\
+																		Timer_Task1_Total += Timer_Task1_Out - Timer_Task1_In;														\
+																	}																																				\
+																	else if( PIN3 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task2_Out = T1TC;																										\
+																		Timer_Task2_Total += Timer_Task2_Out - Timer_Task2_In;												\
+																	}																																				\
+																	else if( PIN4 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task3_Out = T1TC;																										\
+																		Timer_Task3_Total += Timer_Task3_Out - Timer_Task3_In;														\
+																	}																																				\
+																	else if( PIN5 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task4_Out = T1TC;																										\
+																		Timer_Task4_Total += Timer_Task4_Out - Timer_Task4_In;														\
+																	}																																				\
+																	else if( PIN6 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task5_Out = T1TC;																										\
+																		Timer_Task5_Total += Timer_Task5_Out - Timer_Task5_In;															\
+																	}																																				\
+																	else if( PIN7 == (int)pxCurrentTCB->pxTaskTag )													\
+																	{																																				\
+																		Timer_Task6_Out = T1TC;																										\
+																		Timer_Task6_Total += Timer_Task6_Out - Timer_Task6_In;													\
+																	}																																				\
+																	else{}																																	\
+																	GPIO_write(PORT_0, (int)pxCurrentTCB->pxTaskTag, PIN_IS_LOW );					\
+																}																																					\
+
+extern int	 Timer_Task1_In , Timer_Task1_Out , Timer_Task1_Total 
+						,Timer_Task2_In , Timer_Task2_Out , Timer_Task2_Total 
+						,Timer_Task3_In , Timer_Task3_Out , Timer_Task3_Total 
+						,Timer_Task4_In , Timer_Task4_Out , Timer_Task4_Total 		
+						,Timer_Task5_In , Timer_Task5_Out , Timer_Task5_Total
+						,Timer_Task6_In , Timer_Task6_Out , Timer_Task6_Total;
+																
 #endif /* FREERTOS_CONFIG_H */
